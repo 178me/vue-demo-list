@@ -5,15 +5,18 @@ const containerRef = ref<null | HTMLDivElement>(null);
 const scrollBarRef = ref<null | HTMLDivElement>(null);
 const total = ref(20);
 
-const scrollRect = ref({
+const containerRect = ref({
   scrollTop: 0,
   scrollHeight: 0,
+  offsetHeight: 0,
+  clientHeight: 0,
 });
 const scrollPos = computed<CSSProperties>(() => {
   return {
     top: `${
-      (scrollRect.value.scrollTop /
-        (scrollRect.value.scrollHeight - containerRef.value?.clientHeight)) *
+      (containerRect.value.scrollTop /
+        (containerRect.value.scrollHeight -
+          containerRect.value?.clientHeight)) *
       450
     }px`,
     // height: containerRef.value?.clientHeight
@@ -24,29 +27,29 @@ const scrollPos = computed<CSSProperties>(() => {
     //   : "0%",
   };
 });
+// 滚动条移动1像素等于scrollTop的多少倍
 const ratio = computed(() => {
   return (
-    (scrollRect.value.scrollHeight - containerRef.value!.offsetHeight) /
+    (containerRect.value.scrollHeight - containerRef.value!.offsetHeight) /
     (containerRef.value!.offsetHeight - scrollBarRef.value!.offsetHeight)
   );
 });
 
-function modifyTotal(number: number) {
-  total.value += number;
+function updateContainerRectHeight() {
+  containerRect.value.scrollHeight = containerRef.value?.scrollHeight ?? 0;
+  containerRect.value.offsetHeight = containerRef.value?.offsetHeight ?? 0;
+  containerRect.value.clientHeight = containerRef.value?.clientHeight ?? 0;
 }
 
 // 创建一个观察器实例并传入回调函数
-const observer = new MutationObserver((mutationsList, observer) => {
-  console.info("178me-debug:", mutationsList, observer);
-  scrollRect.value.scrollHeight = containerRef.value?.scrollHeight || 0;
+const observer = new MutationObserver(() => {
+  updateContainerRectHeight()
+  console.info("178me-debug:", containerRect.value);
 });
 
 function hdlScroll() {
   if (!containerRef.value) return;
-  scrollRect.value.scrollTop = containerRef.value.scrollTop;
-  scrollRect.value.scrollHeight = containerRef.value.scrollHeight;
-  console.info("178me-debug:", scrollRect.value);
-  console.info("178me-debug:", scrollPos.value);
+  containerRect.value.scrollTop = containerRef.value.scrollTop;
 }
 let pressY = 0;
 
@@ -62,24 +65,27 @@ function hdlMove(e: MouseEvent) {
   if (e.buttons === 0) return;
   if (pressY === 0) return;
   const { y } = e;
-  console.info("178me-debug:",ratio.value)
+  console.info("178me-debug:", ratio.value);
   containerRef.value!.scrollTop += (y - pressY) * ratio.value;
   pressY = y;
 }
 
-watch(scrollRect, () => {
-  console.info("178me-debug:", scrollRect.value);
+watch(containerRect, () => {
+  console.info("178me-debug:", containerRect.value);
 });
 
 nextTick(() => {
   if (!containerRef.value) return;
-  hdlScroll();
+  updateContainerRectHeight()
   observer.observe(containerRef.value, {
     childList: true,
   });
   window.addEventListener("mousemove", hdlMove);
   window.addEventListener("mouseup", hdlUp);
 });
+function modifyTotal(number: number) {
+  total.value += number;
+}
 </script>
 
 <template>
