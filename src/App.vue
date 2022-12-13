@@ -12,14 +12,16 @@ const scrollRect = ref({
 const scrollPos = computed<CSSProperties>(() => {
   return {
     top: `${
-      (scrollRect.value.scrollTop / scrollRect.value.scrollHeight) * 100
-    }%`,
-    height: containerRef.value?.clientHeight
-      ? `${
-          (containerRef.value?.clientHeight / scrollRect.value.scrollHeight) *
-          100
-        }%`
-      : "0%",
+      (scrollRect.value.scrollTop /
+        (scrollRect.value.scrollHeight - containerRef.value?.clientHeight)) *
+      450
+    }px`,
+    // height: containerRef.value?.clientHeight
+    //   ? `${
+    //       (containerRef.value?.clientHeight / scrollRect.value.scrollHeight) *
+    //       100
+    //     }%`
+    //   : "0%",
   };
 });
 const ratio = computed(() => {
@@ -60,6 +62,7 @@ function hdlMove(e: MouseEvent) {
   if (e.buttons === 0) return;
   if (pressY === 0) return;
   const { y } = e;
+  console.info("178me-debug:",ratio.value)
   containerRef.value!.scrollTop += (y - pressY) * ratio.value;
   pressY = y;
 }
@@ -84,16 +87,16 @@ nextTick(() => {
     <button @click="modifyTotal(10)">增加</button>
     <button @click="modifyTotal(-10)">减少</button>
   </div>
-  <div class="relative select-none">
+  <div class="relative select-none mx-100px">
     <div
       @mousedown="hdlDown"
       ref="scrollBarRef"
       bg-blue
-      h-20px
-      w-10px
+      h-50px
+      w-20px
       class="absolute right-4px pointer-events-none1"
       :style="scrollPos"
-    ></div>
+    />
     <div
       @scroll="hdlScroll"
       ref="containerRef"
@@ -101,9 +104,6 @@ nextTick(() => {
       w="full"
       bg="gray"
       overflow="auto"
-      :style="{
-        ...scrollRect,
-      }"
     >
       <div v-for="it in total" text-right pr-13px>
         <div h="50px">
@@ -115,23 +115,7 @@ nextTick(() => {
 </template>
 
 <style scoped>
-.hidden {
-  scrollbar-gutter: stable;
-}
-
 ::-webkit-scrollbar {
   display: none;
-}
-
-.container {
-  height: 160px;
-  width: 300px;
-  overflow: auto;
-  margin: 16px auto;
-  border: 1px solid lightcoral;
-}
-
-.both-edges {
-  scrollbar-gutter: stable both-edges;
 }
 </style>
