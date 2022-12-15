@@ -65,7 +65,6 @@ function updateScrollBarRectHeight() {
 
 // 观察容器和滑块高度变化
 const observer = new MutationObserver((mutationRecord) => {
-  console.info("178me-debug:更新元素高度", mutationRecord);
   if (mutationRecord[0].type === "childList") updateContainerRectHeight();
   else if (mutationRecord[0].type === "attributes") updateScrollBarRectHeight();
 });
@@ -74,29 +73,53 @@ const observer = new MutationObserver((mutationRecord) => {
 function hdlScroll() {
   if (!containerRef.value) return;
   containerRect.value.scrollTop = containerRef.value.scrollTop;
+  console.info("178me-debug:",containerRect.value)
 }
 let pressY = 0;
 
 // 开始拖动
 function hdlDown(e: any) {
-  pressY = e.y;
+  // pressY = e.y;
 }
 
 // 结束拖动
 function hdlUp() {
-  pressY = 0;
+  // pressY = 0;
 }
 
 // 监听拖动距离
 function hdlMove(e: any) {
-  if (e.buttons === 0) return;
-  if (pressY === 0) return;
-  const { y } = e;
-  containerRef.value!.scrollTop += (y - pressY) * moveRatio.value;
+  // if (e.buttons === 0) return;
+  // if (pressY === 0) return;
+  // const { y } = e;
+  // containerRef.value!.scrollTop += (y - pressY) * moveRatio.value;
+  // // 当滚动进度为0和1不更新页面位置
+  // if (scrollProgress.value === 1) return;
+  // else if (scrollProgress.value === 0) return;
+  // else pressY = y;
+}
+
+function hdlTouchStart(e: TouchEvent) {
+  // console.info("178me-debug:", e.changedTouches[0].pageY);
+  pressY = e.changedTouches[0].pageY;
+}
+
+function hdlTouchMove(e: TouchEvent) {
+  const { pageY } = e.changedTouches[0];
+  console.info("178me-debug:",pageY,pressY,moveRatio.value,containerRef.value?.scrollHeight)
+  console.info("178me-debug:",(pageY - pressY) * moveRatio.value)
+  containerRef.value!.scrollTop += (pageY - pressY) * moveRatio.value;
+  console.info("178me-debug:",containerRef.value!.scrollTop)
+  // console.info("178me-debug:",(pageY - pressY) * moveRatio.value)
   // 当滚动进度为0和1不更新页面位置
   if (scrollProgress.value === 1) return;
   else if (scrollProgress.value === 0) return;
-  else pressY = y;
+  else pressY = pageY;
+}
+
+function hdlTouchEnd(e: TouchEvent) {
+  console.info("178me-debug:触摸结束", e.changedTouches[0]);
+  pressY = 0;
 }
 
 function modifyTotal(number: number) {
@@ -117,8 +140,8 @@ onMounted(() => {
     });
     window.addEventListener("mousemove", hdlMove);
     window.addEventListener("mouseup", hdlUp);
-    window.addEventListener("touchmove", hdlMove);
-    window.addEventListener("touchmove", hdlUp);
+    window.addEventListener("touchmove", hdlTouchMove);
+    window.addEventListener("touchend", hdlTouchEnd);
   });
 });
 </script>
@@ -128,9 +151,9 @@ onMounted(() => {
     <button @click="modifyTotal(10)">增加</button>
     <button @click="modifyTotal(-10)">减少</button>
   </div>
-  <div class="relative select-none mx-100px">
+  <div class="relative select-none mx-0px">
     <div
-      @touchstart="hdlDown"
+      @touchstart="hdlTouchStart"
       @mousedown="hdlDown"
       ref="scrollBarRef"
       bg-blue
@@ -149,7 +172,7 @@ onMounted(() => {
     >
       <div v-for="it in total" text-center pr-13px>
         <div h="50px">
-          <!-- {{ it }} -->
+          {{ it }}
         </div>
       </div>
     </div>
