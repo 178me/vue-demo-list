@@ -4,17 +4,25 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 3838" ,
+    "dev": "vite --port 3838 --host",
     "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview"
+  },
+  "prettier": {
+    "bracketSameLine": true,
+    "htmlWhitespaceSensitivity": "ignore",
+    "semi": false
   },
   "dependencies": {
     "@vueuse/core": "^9.6.0",
     "vue": "^3.2.37"
   },
   "devDependencies": {
+    "@types/node": "^18.11.15",
     "@unocss/preset-attributify": "^0.47.5",
     "@vitejs/plugin-vue": "^3.0.0",
+    "@vue/tsconfig": "^0.1.3",
     "typescript": "^4.6.4",
     "unocss": "^0.47.5",
     "unocss-preset-scrollbar": "^0.2.1",

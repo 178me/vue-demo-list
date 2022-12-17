@@ -1,5 +1,8 @@
 {
+  "extends": "@vue/tsconfig/tsconfig.web.json",
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
@@ -11,8 +14,16 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "lib": ["ESNext", "DOM"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "allowJs": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [
+    {
+      "path": "./tsconfig.vite.config.json"
+    }
+  ]
 }
