@@ -1,4 +1,3 @@
-import { isMobile } from "@/utils"
 import { ref, computed, type Ref, type CSSProperties } from "vue"
 
 type ScrollBarOption = {
@@ -42,11 +41,11 @@ export function useScrollBar({
   })
   // 滑块的位置计算
   const sliderPos = computed<CSSProperties>(() => {
-  console.info("178me-debug:progress", scrollProgress.value);
-  console.info("178me-debug:rollable", rollableHeight.value);
-  console.info("178me-debug:ratio", sliderRatio.value);
-  console.info("178me-debug:containerRect", containerRect.value);
-  console.info("178me-debug:scrollRect", sliderRect.value);
+    console.info("178me-debug:progress", scrollProgress.value)
+    console.info("178me-debug:rollable", rollableHeight.value)
+    console.info("178me-debug:ratio", sliderRatio.value)
+    console.info("178me-debug:containerRect", containerRect.value)
+    console.info("178me-debug:scrollRect", sliderRect.value)
     return {
       top: `${scrollProgress.value * rollableHeight.value}px`,
       height: autoHeight ? `${sliderRatio.value * 100}%` : undefined,
@@ -108,38 +107,14 @@ export function useScrollBar({
     else pressY = y
   }
 
-  function hdlTouchStart(e: TouchEvent) {
-    pressY = e.changedTouches[0].pageY
-  }
-
-  function hdlTouchMove(e: TouchEvent) {
-    e.stopPropagation()
-    const { pageY } = e.changedTouches[0]
-    containerEl.value!.scrollTop += (pageY - pressY) * moveRatio.value
-    // 当滚动进度为0和1不更新页面位置
-    if (scrollProgress.value === 1) return
-    else if (scrollProgress.value === 0) return
-    else pressY = pageY
-  }
-
-  function hdlTouchEnd() {
-    pressY = 0
-  }
-
   function modifySliderEventListener(action: "add" | "remove") {
     let modifyFn = "addEventListener"
     if (action === "add") modifyFn = "addEventListener"
     else if (action === "remove") modifyFn = "addEventListener"
 
-    if (isMobile()) {
-      sliderEl.value?.[modifyFn]("touchstart", hdlTouchStart)
-      sliderEl.value?.[modifyFn]("touchmove", hdlTouchMove)
-      sliderEl.value?.[modifyFn]("touchend", hdlTouchEnd)
-    } else {
-      sliderEl.value?.[modifyFn]("mousedown", hdlMouseDown)
-      window[modifyFn]("mousemove", hdlMouseMove)
-      window[modifyFn]("mouseup", hdlMouseUp)
-    }
+    sliderEl.value?.[modifyFn]("pointerdown", hdlMouseDown)
+    window[modifyFn]("pointermove", hdlMouseMove)
+    window[modifyFn]("pointerend", hdlMouseUp)
   }
 
   function init() {

@@ -1,3 +1,19 @@
+<template>
+  <div class="relative select-none mx-0px">
+    <div
+      ref="sliderRef"
+      bg-blue
+      h-50px
+      w-20px
+      class="absolute right-40px pointer-events-none1"
+      style="touch-action: none"
+      :style="sliderPos" />
+    <div ref="scrollContainer">
+      <slot />
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from "vue"
 import { useScrollBar } from "./use/scrollBar"
@@ -25,22 +41,6 @@ onUnmounted(() => {
   uScrollBar.modifySliderEventListener("remove")
 })
 </script>
-
-<template>
-  <div class="relative select-none mx-0px">
-    <div
-      ref="sliderRef"
-      bg-blue
-      h-50px
-      w-20px
-      class="absolute right-40px pointer-events-none1"
-      :style="sliderPos" />
-    <div ref="scrollContainer">
-      <slot />
-    </div>
-  </div>
-</template>
-
 <style scoped>
 ::-webkit-scrollbar {
   display: none;
