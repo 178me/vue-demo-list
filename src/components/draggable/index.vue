@@ -10,7 +10,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { type CSSProperties, ref, computed } from "vue"
+import { type CSSProperties, ref, watch } from "vue"
 
 const props = withDefaults(
   defineProps<{
@@ -26,35 +26,42 @@ const emit = defineEmits<{
   (type: "start"): void
   (type: "move"): void
   (type: "end"): void
+  (type: "dropenter"): void
+  (type: "dropleave"): void
   (type: "dropover"): void
 }>()
 
 // 长按拖拽定时器
-let timer: ReturnType<typeof setTimeout>
+let timer: ReturnType<typeof setTimeout> | undefined
 // 是否在拖拽中
 const isDragging = ref(false)
+// 是否进入拖放区
+const isEnterDrop = ref(false)
 // 拖拽元素
 const el = ref<null | HTMLElement>(null)
 // 拖拽的定位样式
 const elStyle = ref<CSSProperties>({})
-// 拖拽元素的宽高，用于校正定位? NOTE:这个期待更好的做法
-const elRect = computed(() => {
-  return {
-    width: (el.value?.clientWidth || 0) / 2,
-    height: (el.value?.clientHeight || 0) / 2,
-  }
+// 开始触摸点
+const startTouchOffset = ref({ x: 0, y: 0 })
+const startPoint = ref({
+  top: "0px",
+  left: "0px",
 })
 
 function clear() {
   if (timer) {
     clearTimeout(timer)
-    timer = 0
+    timer = undefined
   }
 }
 
 function drag(e: TouchEvent) {
-  elStyle.value.left = `${e.changedTouches[0].clientX - elRect.value.width}px`
-  elStyle.value.top = `${e.changedTouches[0].clientY - elRect.value.height}px`
+  elStyle.value.left = `${
+    e.changedTouches[0].clientX - startTouchOffset.value.x
+  }px`
+  elStyle.value.top = `${
+    e.changedTouches[0].clientY - startTouchOffset.value.y
+  }px`
 }
 
 function getDropArea(parentRect: DOMRect, childRect: DOMRect) {
@@ -68,34 +75,69 @@ function getDropArea(parentRect: DOMRect, childRect: DOMRect) {
   return (excessWidth * excessHeight) / (childRect.width * childRect.height)
 }
 
+function isEnter() {
+  if (props.dropEl && el.value) {
+    const dropArea = getDropArea(
+      props.dropEl.getBoundingClientRect(),
+      el.value.getBoundingClientRect()
+    )
+    if (dropArea > 0.5) {
+      isEnterDrop.value = true
+      return
+    }
+  }
+  isEnterDrop.value = false
+}
+
 function hdlStart(e: TouchEvent) {
   clear()
   timer = setTimeout(() => {
     emit("start")
     isDragging.value = true
+    const staticRect = el.value!.getBoundingClientRect()
     elStyle.value.position = "fixed"
+    elStyle.value.zIndex = 999
+    elStyle.value.transition = ""
+    elStyle.value.width = `${staticRect.width}px`
+    elStyle.value.height = `${staticRect.height}px`
+    startPoint.value.left = `${staticRect.left}px`
+    startPoint.value.top = `${staticRect.top}px`
+    startTouchOffset.value.x = e.changedTouches[0].clientX - staticRect.left
+    startTouchOffset.value.y = e.changedTouches[0].clientY - staticRect.top
     drag(e)
   }, props.duration)
 }
 
 function hdlEnd() {
   clear()
-  if (props.dropEl && el.value) {
-    const dropArea = getDropArea(
-      props.dropEl.getBoundingClientRect(),
-      el.value.getBoundingClientRect()
-    )
-    if (dropArea > 0.5) emit("dropover")
-  }
+  isEnter()
+  if (isEnterDrop.value) emit("dropover")
   emit("end")
-  isDragging.value = false
-  elStyle.value.position = "static"
+  elStyle.value.zIndex = 1
+  if (startPoint.value.left !== "0px") {
+    elStyle.value.transition = "all 0.3s"
+    elStyle.value.position = "fixed"
+    elStyle.value.left = startPoint.value.left
+    elStyle.value.top = startPoint.value.top
+  }
+  setTimeout(() => {
+    isDragging.value = false
+    elStyle.value.position = "static"
+    startPoint.value.left = "0px"
+    startPoint.value.top = "0px"
+  }, 300)
 }
 
 function hdlMove(e: TouchEvent) {
-  if (!isDragging.value) return
-  emit("move")
   clear()
+  if (!isDragging.value) return
+  isEnter()
+  emit("move")
   drag(e)
 }
+
+watch(isEnterDrop, (nVal) => {
+  if (nVal) emit("dropenter")
+  else emit("dropleave")
+})
 </script>

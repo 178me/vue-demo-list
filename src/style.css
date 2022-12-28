@@ -30,3 +30,8 @@ body {
 ::-webkit-scrollbar {
   display: none;
 }
+
+img {
+  pointer-events: none;
+  /* -webkit-touch-callout: none; */
+}
