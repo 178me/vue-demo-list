@@ -18,7 +18,7 @@ const props = withDefaults(
     dropEl?: HTMLElement | null
   }>(),
   {
-    duration: 800,
+    duration: 500,
   }
 )
 
@@ -64,6 +64,11 @@ function drag(e: TouchEvent) {
   }px`
 }
 
+function vibrate(pattern: number | number[]) {
+  if ("vibrate" in window.navigator) window.navigator.vibrate(pattern)
+}
+
+// 计算元素与拖放区域的相交面积
 function getDropArea(parentRect: DOMRect, childRect: DOMRect) {
   const cl = childRect.right - parentRect.left
   const cr = parentRect.right - childRect.left
@@ -93,11 +98,10 @@ function hdlStart(e: TouchEvent) {
   clear()
   timer = setTimeout(() => {
     emit("start")
+    vibrate(20)
     isDragging.value = true
     const staticRect = el.value!.getBoundingClientRect()
-    elStyle.value.position = "fixed"
-    elStyle.value.zIndex = 999
-    elStyle.value.transition = ""
+    el.value!.classList.add("dragging")
     elStyle.value.width = `${staticRect.width}px`
     elStyle.value.height = `${staticRect.height}px`
     startPoint.value.left = `${staticRect.left}px`
@@ -113,16 +117,15 @@ function hdlEnd() {
   isEnter()
   if (isEnterDrop.value) emit("dropover")
   emit("end")
-  elStyle.value.zIndex = 1
   if (startPoint.value.left !== "0px") {
-    elStyle.value.transition = "all 0.3s"
-    elStyle.value.position = "fixed"
+    el.value!.classList.add("dragend")
     elStyle.value.left = startPoint.value.left
     elStyle.value.top = startPoint.value.top
   }
   setTimeout(() => {
     isDragging.value = false
-    elStyle.value.position = "static"
+    el.value!.classList.remove("dragging")
+    el.value!.classList.remove("dragend")
     startPoint.value.left = "0px"
     startPoint.value.top = "0px"
   }, 300)
@@ -141,3 +144,13 @@ watch(isEnterDrop, (nVal) => {
   else emit("dropleave")
 })
 </script>
+
+<style scoped>
+.dragging {
+  position: fixed;
+  z-index: 999;
+}
+.dragend {
+  transition: all 0.3s;
+}
+</style>
