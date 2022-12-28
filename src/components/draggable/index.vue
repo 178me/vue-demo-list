@@ -98,7 +98,7 @@ function hdlStart(e: TouchEvent) {
   clear()
   timer = setTimeout(() => {
     emit("start")
-    vibrate(20)
+    vibrate(15)
     isDragging.value = true
     const staticRect = el.value!.getBoundingClientRect()
     el.value!.classList.add("dragging")
