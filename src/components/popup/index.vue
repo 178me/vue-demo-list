@@ -2,35 +2,35 @@
 // import { provide } from "vue";
 // import { closeDialogKey } from "./keys";
 
-import { getCurrentInstance } from "vue";
+import { getCurrentInstance } from "vue"
 
 export interface DialogProps {
   // 显示和隐藏
-  visiable?: boolean;
+  visiable?: boolean
   // 遮罩是否可点击关闭
-  closeOnClickOverlay?: boolean;
+  closeOnClickOverlay?: boolean
   // 对话框对外暴露class修改样式
-  dialogClass?: string | string[] | object;
+  dialogClass?: string | string[] | object
 }
 const props = withDefaults(defineProps<DialogProps>(), {
   visiable: false,
   closeOnClickOverlay: true,
   dialogClass: "",
-});
-const emit = defineEmits(["update:visiable"]);
+})
+const emit = defineEmits(["update:visiable"])
 
 const hdlClickOverlay = () => {
-  props.closeOnClickOverlay && emit("update:visiable", false);
-};
+  props.closeOnClickOverlay && emit("update:visiable", false)
+}
 
 // 提供关闭方法给插槽组件
 // provide(closeDialogKey, () => emit("update:visiable", false));
-const duration = "0.5s";
-const duration2 = "0.5s";
+const duration = "0.5s"
+const duration2 = "0.5s"
 
-const vm = getCurrentInstance();
+const vm = getCurrentInstance()
 function hdlLeave() {
-  vm?.vnode.el?.remove();
+  vm?.parent?.vnode.el?.remove()
 }
 </script>
 
@@ -39,15 +39,13 @@ function hdlLeave() {
     <div
       @click="hdlClickOverlay"
       v-if="visiable"
-      class="absolute inset-0 bottom-0 z-50 flex bg-stone-900 bg-opacity-50"
-    >
+      class="absolute inset-0 bottom-0 z-50 flex bg-stone-900 bg-opacity-50">
       <div
         @click.stop
         class="dialog absolute bottom-0 flex flex-col"
         h-600px
         bg-blue
-        w-full
-      >
+        w-full>
         <div>ActionSheet</div>
       </div>
     </div>
