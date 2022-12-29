@@ -1,18 +1,20 @@
-<script setup lang="ts">
-import ScrollBar from "@/components/scroll-bar/index.vue"
+<script lang="ts" setup>
+import { ref } from "vue"
+import Page from "@/layout/page/index.vue"
+import ActionSheet from "@/components/ActionSheet.vue"
+import TipManage from "@/components/tip"
+const show = ref(false)
+const tip = TipManage()
+
+function hdlTest() {
+  show.value = true
+  tip.present("hihi", { message: "111111111" })
+}
 </script>
 
 <template>
-  <div class="w-screen h-screen overflow-hidden flex flex-col">
-    <div h-100px></div>
-    <ScrollBar>
-      <div h="500px" w="full" bg="gray" overflow="auto" my-0px>
-        <div v-for="it in 300" text-center pr-13px>
-          <div h="50px">
-            {{ it }}
-          </div>
-        </div>
-      </div>
-    </ScrollBar>
-  </div>
+  <Page flex="~ col" items-center title="测试Popup">
+    <button @click="hdlTest()" mt-30 text="30px" select-none>open</button>
+    <ActionSheet v-model:visiable="show">1111111111</ActionSheet>
+  </Page>
 </template>
