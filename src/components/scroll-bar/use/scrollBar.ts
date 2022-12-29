@@ -11,6 +11,7 @@ export function useScrollBar({
   sliderEl,
   autoHeight,
 }: ScrollBarOption) {
+  let pressY = 0
   // 容器的各种数值
   const containerRect = ref({
     scrollTop: 0,
@@ -25,7 +26,6 @@ export function useScrollBar({
   })
   // 滚动进度
   const scrollProgress = computed(() => {
-    // console.info("178me-debug:","dsf")
     return (
       containerRect.value.scrollTop /
       (containerRect.value.scrollHeight - containerRect.value.clientHeight)
@@ -84,20 +84,19 @@ export function useScrollBar({
     if (!containerEl.value) return
     containerRect.value.scrollTop = containerEl.value.scrollTop
   }
-  let pressY = 0
 
   // 开始拖动
-  function hdlMouseDown(e: any) {
+  function hdlDown(e: any) {
     pressY = e.y
   }
 
   // 结束拖动
-  function hdlMouseUp() {
+  function hdlUp() {
     pressY = 0
   }
 
   // 监听拖动距离
-  function hdlMouseMove(e: any) {
+  function hdlMove(e: any) {
     if (pressY === 0) return
     const { y } = e
     containerEl.value!.scrollTop += (y - pressY) * moveRatio.value
@@ -110,11 +109,11 @@ export function useScrollBar({
   function modifySliderEventListener(action: "add" | "remove") {
     let modifyFn = "addEventListener"
     if (action === "add") modifyFn = "addEventListener"
-    else if (action === "remove") modifyFn = "addEventListener"
+    else if (action === "remove") modifyFn = "removeEventListener"
 
-    sliderEl.value?.[modifyFn]("pointerdown", hdlMouseDown)
-    window[modifyFn]("pointermove", hdlMouseMove)
-    window[modifyFn]("pointerend", hdlMouseUp)
+    sliderEl.value?.[modifyFn]("pointerdown", hdlDown)
+    window[modifyFn]("pointermove", hdlMove)
+    window[modifyFn]("pointerup", hdlUp)
   }
 
   function init() {
@@ -130,7 +129,7 @@ export function useScrollBar({
       containerEl.value.addEventListener("scroll", hdlScroll)
       modifySliderEventListener("add")
     } else {
-      console.info("useScrollBar:", "初始化失败!", { containerEl, sliderEl })
+      console.error("useScrollBar:", "初始化失败!", { containerEl, sliderEl })
     }
   }
 
