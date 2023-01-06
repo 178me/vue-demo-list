@@ -15,6 +15,7 @@
     "semi": false
   },
   "dependencies": {
+    "@lazycatcloud/lzc-toolkit": "^0.0.18",
     "@vueuse/core": "^9.6.0",
     "pinia": "^2.0.28",
     "vue": "^3.2.37",

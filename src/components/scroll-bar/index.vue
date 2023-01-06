@@ -8,7 +8,7 @@
       class="absolute right-40px pointer-events-none1"
       style="touch-action: none"
       :style="sliderPos" />
-    <div ref="scrollContainer">
+    <div ref="scrollContainer" h-full>
       <slot />
     </div>
   </div>
