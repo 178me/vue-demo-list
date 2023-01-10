@@ -10,7 +10,7 @@ defineProps<{
 </script>
 
 <template>
-  <div flex="~ col" w="screen" h="screen">
+  <div flex="~ col" w="full" h="full">
     <span text="center 25px">{{ title }}</span>
     <div v-bind="$attrs" grow><slot></slot></div>
   </div>
